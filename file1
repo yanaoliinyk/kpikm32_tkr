@@ -1,0 +1,54 @@
+$i = 1;
+	while(!feof($file)) {
+
+		$listUsers[$i][0] = substr(fgets($file, 40), 0, -2);
+		$listUsers[$i][1] = substr(fgets($file, 40), 0, -2);	
+		$userEmail = $listUsers[$i][0];
+		
+		if($listUsers[$i][0] == $inputLogin) {
+		
+			if($inputPass == substr(fgets($file, 40), 0, -2)) {
+				$_SESSION['user'] = $listUsers[$i][1];
+				$_SESSION['username'] = $inputLogin;
+				
+				//echo $i.". <br>";
+				//echo "Email: ".$listUsers[$i][0]."<br>";
+				//echo "User: ".$listUsers[$i][1]."<br>";
+				//echo "Pass: ".$listUsers[$i][2]."<br>";
+				$i--;
+				$ban = fopen("bans.txt", "r");
+				if(!$file) {
+					exit;
+				}
+				else {
+					flock($file, LOCK_EX); // Блокирование файла для записи
+				}
+				while(!feof($ban)) {
+					
+					$tempEmail = substr(fgets($ban, 40), 0, -2);
+					if($tempEmail == $userEmail) {
+						$_SESSION['username'] = 'user';
+						$_SESSION['user'] = 'Гость';
+						echo "<script>alert('Ви були додані до бан листу адміністратором, певне через те, що Ви залишали неприйнятні коментарі.')</script>";
+					}
+				}
+				fclose($ban);
+				//flock($file, LOCK_UN); // Снятие блокировки
+				//fclose($file);
+				break;
+			}
+		}
+		fgets($file, 40);
+		fgets($file, 40);
+		
+		if(feof($file)) {
+			$_SESSION['username'] = "user";
+			$_SESSION['user'] = "Гость";
+			echo "Імя користувача або пароль невірні.<br>";
+			break;
+		}
+		$i++;		
+	}	
+	
+	flock($file, LOCK_UN); // Снятие блокировки
+	fclose($file);
